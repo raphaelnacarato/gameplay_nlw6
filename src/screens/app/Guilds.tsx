@@ -25,7 +25,7 @@ export function Guilds({ handleGuildSelected }: Props) {
          icon: 'image.png',
          owner: true
       },
-   ]
+   ];
 
    return (
       <View style={styles.container}>
@@ -39,7 +39,9 @@ export function Guilds({ handleGuildSelected }: Props) {
                />
             )}
             showsVerticalScrollIndicator={false}
-            ItemSeparatorComponent={() => <ListDivider />}
+            ItemSeparatorComponent={() => <ListDivider isCentered />}
+            ListHeaderComponent={() => <ListDivider isCentered />}
+            contentContainerStyle={{ paddingBottom: 50, paddingTop: 50 }}
             style={styles.guilds}
          />
       </View>

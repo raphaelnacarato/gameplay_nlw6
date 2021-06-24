@@ -11,15 +11,9 @@ export const styles = StyleSheet.create({
       marginBottom: 42,
    },
 
-   content: {
-      flex: 1,
-      marginTop: 42,
-   },
-
    matches: {
       marginTop: 24,
       marginLeft: 24,
    }
-
 
 });
