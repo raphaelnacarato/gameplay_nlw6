@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid';
 
 import { Guilds } from './Guilds';
 
@@ -15,6 +18,8 @@ import { Button } from '../../components/Button';
 import { ModalView } from '../../components/ModalView';
 import { GuildProps } from '../../components/Guild';
 
+import { COLLETCION_APPOINTMENTS } from '../../config/storage';
+
 import { theme } from '../../styles/theme';
 import { styles } from '../../styles/screens/app/AppointmentCreate';
 
@@ -23,6 +28,14 @@ export function AppointmentCreate() {
    const [category, setCategory] = useState('');
    const [guildsModalIsOpen, setGuildsModalIsOpen] = useState(false);
    const [guild, setGuild] = useState<GuildProps>({} as GuildProps);
+
+   const [day, setDay] = useState('');
+   const [month, setMonth] = useState('');
+   const [hour, setHour] = useState('');
+   const [minute, setMinute] = useState('');
+   const [description, setDescription] = useState('');
+
+   const { navigate } = useNavigation();
 
    function handleOpenGuildsModal() {
       setGuildsModalIsOpen(true);
@@ -39,6 +52,23 @@ export function AppointmentCreate() {
 
    function handleCategorySelect(categoryId: string) {
       setCategory(categoryId);
+   };
+
+   async function handleSave() {
+      const newAppointment = {
+         id: uuid.v4(),
+         guild,
+         category,
+         date: `${day}/${month} ás ${hour}:${minute}h`,
+         description
+      };
+
+      const storage = await AsyncStorage.getItem(COLLETCION_APPOINTMENTS);
+      const appointments = storage ? JSON.parse(storage) : [];
+
+      await AsyncStorage.setItem(COLLETCION_APPOINTMENTS, JSON.stringify([...appointments, newAppointment]));
+
+      navigate('Home');
    };
 
    return (
@@ -69,7 +99,7 @@ export function AppointmentCreate() {
                   <RectButton onPress={handleOpenGuildsModal}>
                      <View style={styles.select}>
                         {guild.icon ?
-                           < GuildIcon />
+                           < GuildIcon guildId={guild.id} iconId={guild.icon} />
                            :
                            <View style={styles.image} />
                         }
@@ -89,9 +119,17 @@ export function AppointmentCreate() {
                         <Text style={[styles.label, { marginBottom: 12 }]}>Dia e mês</Text>
 
                         <View style={styles.column}>
-                           <SmallInput maxLength={2} />
+                           <SmallInput
+                              value={day}
+                              onChangeText={setDay}
+                              maxLength={2}
+                           />
                            <Text style={styles.divider}>/</Text>
-                           <SmallInput maxLength={2} />
+                           <SmallInput
+                              value={month}
+                              onChangeText={setMonth}
+                              maxLength={2}
+                           />
                         </View>
                      </View>
 
@@ -99,9 +137,17 @@ export function AppointmentCreate() {
                         <Text style={[styles.label, { marginBottom: 12 }]}>Hora e minuto</Text>
 
                         <View style={styles.column}>
-                           <SmallInput maxLength={2} />
+                           <SmallInput
+                              value={hour}
+                              onChangeText={setHour}
+                              maxLength={2}
+                           />
                            <Text style={styles.divider}>:</Text>
-                           <SmallInput maxLength={2} />
+                           <SmallInput
+                              value={minute}
+                              onChangeText={setMinute}
+                              maxLength={2}
+                           />
                         </View>
                      </View>
                   </View>
@@ -111,6 +157,8 @@ export function AppointmentCreate() {
                      <Text style={styles.caracteresLimit}>Max 100 caracteres</Text>
                   </View>
                   <TextArea
+                     value={description}
+                     onChangeText={setDescription}
                      multiline
                      maxLength={100}
                      numberOfLines={5}
@@ -119,7 +167,10 @@ export function AppointmentCreate() {
                </View>
 
                <View style={styles.footer}>
-                  <Button title='Agendar' />
+                  <Button
+                     title='Agendar'
+                     onPress={handleSave}
+                  />
                </View>
             </ScrollView>
          </Background>
